@@ -7,18 +7,15 @@ from .models import User
 
 
 def register_page(request):
+    form = UserForm()
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        if password1 != password2:
-            messages.error(request, 'Your passwords are not the same, please try again')
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
         else:
-            user = User.create(email=email, username=username, password1=password1, password2=password2)
-            login(request, user)
-            return redirect('admin')
-    return render(request, 'authentication/register.html', {})
+            messages.error(request, 'Something wrong with register, please try again')
+    return render(request, 'authentication/register.html', {'form': form})
 
 
 def login_page(request):
@@ -27,9 +24,8 @@ def login_page(request):
         password = request.POST.get('password')
         user = authenticate(request, email=email, password=password)
         if user is not None:
-            pass
-            # login(request, user)
-            # return redirect('profile')
+            login(request, user)
+            return redirect('dashboard')
         else:
             messages.error(request, 'Incorrect email or password')
     return render(request, 'authentication/login.html', {})
