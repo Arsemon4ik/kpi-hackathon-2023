@@ -11,7 +11,8 @@ def register_page(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            login(request, user)
             return redirect('dashboard')
         else:
             messages.error(request, 'Something wrong with register, please try again')

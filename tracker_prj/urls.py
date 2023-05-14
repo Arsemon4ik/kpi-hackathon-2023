@@ -19,4 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('sign/', include('authentication.urls')),
+    path('', include('tracker_app.urls')),
 ]

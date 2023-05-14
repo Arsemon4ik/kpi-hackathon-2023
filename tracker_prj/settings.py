@@ -33,6 +33,10 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+SITE_ID = 1
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,7 +47,7 @@ INSTALLED_APPS = [
 
     'tracker_app',
 
-    'authentication'
+    'authentication',
 ]
 
 AUTH_USER_MODEL = 'authentication.User'
@@ -112,9 +116,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uk'
+# Часовий пояс
+TIME_ZONE = 'Europe/Kiev'
 
-TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
