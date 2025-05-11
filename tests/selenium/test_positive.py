@@ -1,3 +1,5 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -21,6 +23,7 @@ def test_successful_login():
     password_field.send_keys("adminadmin")
     password_field.send_keys(Keys.RETURN)
 
+    time.sleep(3)
     assert "Додати новий предмет" in driver.page_source
 
     driver.quit()
