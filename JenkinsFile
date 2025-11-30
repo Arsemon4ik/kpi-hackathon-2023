@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    stages {
+        stage ('Clone branch') {
+            steps {
+                echo 'Cloning release branch'
+                git branch: 'jenkins-implementation', url: 'https://github.com/Arsemon4ik/kpi-hackathon-2023/'
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                script {
+                    sh 'python3 -m venv venv'
+                    sh '. venv/bin/activate && pip3 install --upgrade pip'
+                    sh '. venv/bin/activate && pip3 install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Run Server and Tests') {
+            steps {
+                script {
+                    sh '''
+                        . venv/bin/activate
+                        python3 manage.py migrate
+
+                        python3 manage.py runserver 0.0.0.0:8000 &
+                        SERVER_PID=$!
+                        echo "Server PID: $SERVER_PID"
+
+                        while ! curl -s http://localhost:8000 >/dev/null; do
+                            sleep 1
+                        done
+
+                        pytest -v
+                        TEST_RESULT=$?
+
+                        kill $SERVER_PID || true
+                        exit $TEST_RESULT
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
+}
