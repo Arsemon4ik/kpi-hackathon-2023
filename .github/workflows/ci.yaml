@@ -22,15 +22,23 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f actions-requirements.txt ]; then pip install -r actions-requirements.txt; fi
 
-
-      - name: Run tests and generate report
-        run: pytest ./tests/ -v --tb=line -rE --durations=0 --disable-warnings --junitxml=report.xml || true
+      - name: Run server and run the tests
+        run: |
+          python3 manage.py migrate
+          python3 manage.py runserver 0.0.0.0:8000 &
+          SERVER_PID=$!
+          echo "Server PID: $SERVER_PID"
+          while ! curl -s http://localhost:8000 >/dev/null; do
+              sleep 1
+          done
+          pytest ./tests/ -v --tb=line -rE --durations=0 --disable-warnings --junitxml=report.xml || true
 
       - name: Send report to analysis server
         run: |
           echo "Sending report to server..."
-          curl --fail -X POST ${{ secrets.SERVER_URL }} \
+          curl --fail -X POST ${{ secrets.SERVER_URL }}/api/receive/ \
                -H "Content-Type: multipart/form-data" \
+               -H "X-API-Key: ${{ secrets.USER_KEY }}" \
                -F "file=@report.xml"
